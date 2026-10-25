@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vansh Kulshrestha</title>
+  <meta name="description" content="Vansh Kulshrestha — AI/ML engineer. LLM systems, reinforcement learning for reasoning, AI security and spiking neural networks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0e14'/><text x='5' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%2350fa7b'>&gt;_</text></svg>">
+</head>
+<body>
+
+  <!-- boot sequence -->
+  <div id="boot" aria-hidden="true">
+    <pre id="boot-log"></pre>
+    <span class="boot-skip">press any key to skip</span>
+  </div>
+
+  <canvas id="neurons" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div id="cursor" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a href="#top" class="logo"><span class="prompt">&gt;</span> Vansh<span class="blink">_</span></a>
+    <nav>
+      <a href="#about"><span>01</span>About</a>
+      <a href="#skills"><span>02</span>Skills</a>
+      <a href="#projects"><span>03</span>Projects</a>
+      <a href="#experience"><span>04</span>Experience</a>
+      <a href="#certifications"><span>05</span>Certifications</a>
+      <a href="#contact"><span>06</span>Contact</a>
+    </nav>
+    <button class="term-toggle" id="term-toggle" title="Open terminal (press `)"><kbd>`</kbd> Terminal</button>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow mono"><span class="dot live"></span> Online · VIT-AP · B.Tech CSE (AI &amp; ML) '27</p>
+        <h1 class="glitch" data-text="Vansh Kulshrestha">Vansh Kulshrestha</h1>
+        <p class="role mono">&gt; <span id="typed"></span><span class="caret"></span></p>
+        <p class="lede">I build things that sit underneath language models — inference engines, RL training loops, and defenses for the APIs that serve them.</p>
+        <div class="cta">
+          <a class="btn primary" href="#projects">View projects <span>→</span></a>
+          <a class="btn" href="assets/Vansh_Kulshrestha_Resume.pdf" target="_blank" rel="noopener">Resume.pdf</a>
+        </div>
+        <p class="hint mono">↯ The background is a live spiking neural network — move your cursor to stimulate it, click to fire a burst.</p>
+      </div>
+
+      <div class="window hero-term" id="hero-term">
+        <div class="window-bar">
+          <i></i><i></i><i></i>
+          <span>vansh@portfolio: ~</span>
+        </div>
+        <div class="term-body" data-term>
+          <div class="term-out"></div>
+          <label class="term-line">
+            <span class="ps1">vansh@portfolio:~$</span>
+            <input type="text" spellcheck="false" autocomplete="off" aria-label="terminal input">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <h2 class="section-title"><span class="mono">01.</span> About<span class="rule"></span></h2>
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <p>Hi, I'm <strong>Vansh</strong> — a final-year B.Tech Computer Science student at <strong>VIT-AP University</strong> in Amaravati, specializing in Artificial Intelligence &amp; Machine Learning and graduating in 2027.</p>
+          <p>I started working on real ML problems early. In my first year I did two internships in Bangalore: at <strong>Fox Trading</strong> I built a model that predicts parking availability from historical occupancy data, and at <strong>Personifwy</strong> I trained a 500M-parameter language model end to end — data preparation, tokenization, GPU training and checkpoint evaluation. Those internships pulled me toward the engineering side of AI: how models are trained, served and kept secure.</p>
+          <p>Most of what I learn, I learn by rebuilding it from scratch — a spiking neural network in NumPy, an LLM inference engine with its own KV cache, a GRPO trainer without the RL libraries. It's slower than calling a library, but it's the fastest way I know to understand why things work.</p>
+          <p>Right now I'm interested in three things: making LLMs <em>fast</em> to serve, making them <em>reason</em> better with reinforcement learning, and making the APIs that host them <em>harder to steal from</em>. That last one is turning into a research paper.</p>
+          <p class="mono dim">// Currently: finishing the final benchmark sweep on my inference engine and writing the GRPO training loop.</p>
+        </div>
+        <div class="stats reveal">
+          <div class="stat"><b data-count="2.37" data-dec="2">0</b><span>× throughput over the best Hugging Face baseline (mini-infer)</span></div>
+          <div class="stat"><b data-count="500" data-suffix="M">0</b><span>parameter transformer trained end-to-end during an internship</span></div>
+          <div class="stat"><b data-count="95" data-prefix="~" data-suffix="%">0</b><span>MNIST accuracy with a spiking neural net built from scratch</span></div>
+          <div class="stat"><b data-count="2">0</b><span>builds running in parallel right now</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section">
+      <h2 class="section-title"><span class="mono">02.</span> Skills<span class="rule"></span></h2>
+      <p class="section-sub mono">Click a skill to see where I've used it ↓</p>
+      <div class="skill-grid" id="skill-grid"></div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section">
+      <h2 class="section-title"><span class="mono">03.</span> Projects<span class="rule"></span></h2>
+
+      <div class="filter-bar mono" id="filter-bar" hidden>
+        Filtering by <b id="filter-name"></b>
+        <button id="filter-clear">Clear ×</button>
+      </div>
+
+      <h3 class="sub-title mono"><span class="dot live"></span> Running processes</h3>
+      <div class="proc-grid" id="proc-grid"></div>
+
+      <h3 class="sub-title mono"><span class="dot done"></span> Shipped</h3>
+      <div class="card-grid" id="card-grid"></div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" class="section">
+      <h2 class="section-title"><span class="mono">04.</span> Experience &amp; Research<span class="rule"></span></h2>
+      <div class="exp-wrap">
+        <ol class="timeline" id="timeline"></ol>
+        <aside class="window research reveal">
+          <div class="window-bar"><i></i><i></i><i></i><span>research/manuscript.md</span></div>
+          <div class="research-body">
+            <p class="tag mono">Manuscript in preparation</p>
+            <h3>Detecting Model-Extraction Probing with Semantic Embeddings and MMD</h3>
+            <p>An inference-API wrapper that spots attackers trying to clone or invert an LLM by watching the <em>shape</em> of their query traffic — comparing the distribution of semantic query embeddings against benign traffic with maximum mean discrepancy.</p>
+            <ul>
+              <li>Calibrated on benign traffic only — no attack data needed to set thresholds.</li>
+              <li>Session-level risk profile with a five-level graduated response, to avoid punishing legitimate users.</li>
+              <li>Benchmarked against PRADA, SEAT and other baselines on a 14-pair extraction benchmark.</li>
+            </ul>
+            <div class="mmd-viz" id="mmd-viz" aria-hidden="true">
+              <canvas id="mmd-canvas"></canvas>
+              <div class="mmd-legend mono">
+                <span><i class="b"></i>Benign</span><span><i class="a"></i>Probing</span>
+                <span class="mmd-score">MMD² = <b id="mmd-val">0.000</b></span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section id="certifications" class="section">
+      <h2 class="section-title"><span class="mono">05.</span> Certifications<span class="rule"></span></h2>
+      <div class="cert-grid" id="cert-grid"></div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section contact">
+      <h2 class="section-title"><span class="mono">06.</span> Contact<span class="rule"></span></h2>
+      <div class="contact-box reveal">
+        <p class="big">Looking for internships in <span class="hl">ML engineering</span>, <span class="hl">LLM systems</span> or <span class="hl">AI security</span>.</p>
+        <p class="dim">Fastest way to reach me is email. I usually reply within a day.</p>
+        <div class="contact-links mono">
+          <a href="mailto:vanshryan@gmail.com" class="btn primary">$ mail vanshryan@gmail.com</a>
+          <button class="btn" id="copy-email">Copy email</button>
+          <a href="https://www.linkedin.com/in/vansh-kulshrestha04/" class="btn" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="https://github.com/Vansh8010-boop" class="btn" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mono">
+    <span>© <span id="year"></span> Vansh Kulshrestha</span>
+    <span class="dim">built by hand · no frameworks · <span id="fps">-- fps</span></span>
+  </footer>
+
+  <!-- overlay terminal -->
+  <div id="term-overlay" hidden>
+    <div class="window">
+      <div class="window-bar"><i class="close" id="term-close" title="close"></i><i></i><i></i><span>vansh@portfolio: ~ (esc to close)</span></div>
+      <div class="term-body" data-term>
+        <div class="term-out"></div>
+        <label class="term-line">
+          <span class="ps1">vansh@portfolio:~$</span>
+          <input type="text" spellcheck="false" autocomplete="off" aria-label="terminal input">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script src="data.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
