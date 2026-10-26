@@ -503,3 +503,4 @@ footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wr
 .viz .go { fill: var(--green); filter: drop-shadow(0 0 6px var(--green)); }
 .pv-viz { margin: 32px 0 0; max-width: 640px; cursor: default; }
 .pv-viz:hover { transform: none; box-shadow: none; }
+#skills .group-title { margin-top: 96px; }
