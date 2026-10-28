@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=12">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0e14'/><text x='5' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%2350fa7b'>&gt;_</text></svg>">
 </head>
 <body>
@@ -26,7 +26,7 @@
   <div id="cursor" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a href="#top" class="logo"><span class="prompt">&gt;</span> Vansh<span class="blink">_</span></a>
+    <a href="#top" class="logo"><span class="prompt">&gt;</span> Vansh<span class="cursor-char">_</span></a>
     <nav class="nav-desktop" aria-label="Sections">
       <a href="#about">About</a>
       <a href="#projects">Projects</a>
@@ -57,9 +57,9 @@
     <section class="hero">
       <div class="hero-text">
         <p class="eyebrow mono"><span class="dot live"></span> Open to internships · Final-year CSE (AI &amp; ML) · VIT-AP</p>
-        <h1 class="glitch" data-text="Vansh Kulshrestha">Vansh Kulshrestha</h1>
+        <h1>Vansh Kulshrestha</h1>
         <p class="role mono">&gt; <span id="typed"></span><span class="caret"></span></p>
-        <p class="lede">I build the machinery under language models: an inference engine that serves Qwen2.5 <strong>2.37× faster</strong> than Hugging Face, an RL trainer that teaches small models math, and defenses that catch people trying to steal models through their APIs.</p>
+        <p class="lede">I build the machinery under language models: an inference engine that serves Qwen2.5 <strong>2.37× faster</strong> than Hugging Face, an RL trainer for teaching small models math, and defenses that catch people trying to steal models through their APIs.</p>
         <div class="cta">
           <a class="btn primary" href="#projects">See my work <span>→</span></a>
           <a class="btn" href="assets/Vansh_Kulshrestha_Resume.pdf" target="_blank" rel="noopener">Resume</a>
@@ -70,7 +70,7 @@
         <div class="portrait-ring"><img src="assets/img/me.jpg?v=2" alt="Photo of Vansh Kulshrestha" width="320" height="320"></div>
         <figcaption class="mono">Vansh · Amaravati, India</figcaption>
       </figure>
-      <p class="hint mono">↯ The background is a live spiking neural network. Move your cursor to stimulate it; click to fire a burst.</p>
+      <p class="hint mono"><span>↯ The background is a small spiking neural network. Move your cursor to stimulate it.</span><button id="motion-toggle" aria-pressed="false">Pause background</button></p>
     </section>
 
     <!-- ABOUT -->
@@ -137,21 +137,8 @@
     <!-- SKILLS -->
     <section id="skills" class="section">
       <p class="kicker mono">Skills</p>
-      <h2>Does my profile fit your role?</h2>
-      <div class="matcher reveal">
-        <p class="matcher-intro">Paste a job description and I'll show which requirements I've already used in real projects, and where.</p>
-        <div class="matcher-samples mono">
-          Try: <button data-sample="0">ML Engineer intern</button> <button data-sample="1">LLM infrastructure</button> <button data-sample="2">AI security</button>
-        </div>
-        <textarea id="jd" rows="6" placeholder="Paste a job description here…"></textarea>
-        <div class="matcher-actions">
-          <button class="btn primary" id="match-btn">Check the fit</button>
-          <span class="mono dim small">Runs in your browser with simple phrase matching. Nothing is sent anywhere.</span>
-        </div>
-        <div id="match-out" aria-live="polite"></div>
-      </div>
-
-      <h3 class="group-title">Toolkit <span class="dim small mono">— click one to see the work that uses it</span></h3>
+      <h2>What I work with</h2>
+      <p class="sub">Click a skill to see the projects and work that use it.</p>
       <div class="skill-rows" id="skill-rows"></div>
     </section>
 
@@ -188,11 +175,6 @@
     </section>
   </main>
 
-  <footer class="mono">
-    <span>© <span id="year"></span> Vansh Kulshrestha</span>
-    <span class="dim">Built by hand · no frameworks · <span id="fps">-- fps</span></span>
-  </footer>
-
   <!-- project page -->
   <div id="project-view" role="dialog" aria-modal="true" aria-labelledby="pv-title" hidden>
     <div class="pv-bar">
@@ -212,7 +194,7 @@
   <!-- terminal -->
   <div id="term-overlay" hidden>
     <div class="window">
-      <div class="window-bar"><i class="close" id="term-close" title="Close"></i><i></i><i></i><span>vansh@portfolio: ~ (Esc to close)</span></div>
+      <div class="window-bar"><button class="wbtn close" id="term-close" title="Close" aria-label="Close terminal"></button><button class="wbtn min" id="term-min" title="Minimize" aria-label="Minimize terminal"></button><button class="wbtn max" id="term-max" title="Maximize" aria-label="Maximize terminal"></button><span>vansh@portfolio: ~</span></div>
       <div class="term-body" data-term>
         <div class="term-out"></div>
         <label class="term-line">
@@ -223,9 +205,11 @@
     </div>
   </div>
 
+  <button id="term-dock" hidden aria-label="Restore terminal"><i></i>terminal</button>
+
   <div id="toast" role="status"></div>
 
-  <script src="data.js?v=7"></script>
-  <script src="main.js?v=7"></script>
+  <script src="data.js?v=12"></script>
+  <script src="main.js?v=12"></script>
 </body>
 </html>

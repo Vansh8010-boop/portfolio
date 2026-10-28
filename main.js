@@ -67,7 +67,7 @@
       nodes = Array.from({ length: n }, () => ({
         x: Math.random() * W, y: Math.random() * H,
         vx: (Math.random() - 0.5) * 0.15, vy: (Math.random() - 0.5) * 0.15,
-        v: Math.random() * 0.5, ref: 0, flash: 0, nb: [],
+        v: Math.random() * 0.5, ref: 0, glow: 0, target: 0, nb: [],
       }));
       pulses = [];
       link();
@@ -80,7 +80,7 @@
       }
     }
     function spike(a) {
-      a.v = 0; a.ref = REFRACT; a.flash = 1;
+      a.v = 0; a.ref = REFRACT; a.target = 1;
       for (const b of a.nb) pulses.push({ a, b, t: 0, s: 0.035 + Math.random() * 0.02 });
     }
     function step() {
@@ -90,12 +90,13 @@
         a.x += a.vx; a.y += a.vy;
         if (a.x < 0 || a.x > W) a.vx *= -1;
         if (a.y < 0 || a.y > H) a.vy *= -1;
-        a.flash *= 0.92;
+        // ease the glow up and back down over ~1s so spikes never strobe
+        a.glow += (a.target - a.glow) * 0.08; a.target *= 0.95;
         if (a.ref > 0) { a.ref--; continue; }
         a.v += -a.v * LEAK + Math.random() * 0.01;
-        if (Math.random() < 0.0018) a.v += 0.8;
+        if (Math.random() < 0.0012) a.v += 0.8;
         const d = Math.hypot(a.x - mouse.x, a.y - mouse.y);
-        if (d < 150) a.v += 0.05 * (1 - d / 150);
+        if (d < 150) a.v += 0.03 * (1 - d / 150);
         if (a.v >= 1) spike(a);
       }
       for (let i = pulses.length - 1; i >= 0; i--) {
@@ -112,39 +113,40 @@
       ctx.clearRect(0, 0, W, H);
       ctx.lineWidth = 1;
       for (const a of nodes) for (const b of a.nb) {
-        const act = Math.max(a.flash, b.flash);
-        ctx.strokeStyle = `rgba(76,201,240,${0.05 + act * 0.22})`;
+        ctx.strokeStyle = `rgba(217,198,168,${0.04 + Math.max(a.glow, b.glow) * 0.1})`;
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
-      ctx.fillStyle = "rgba(80,250,123,.85)";
+      ctx.fillStyle = "rgba(240,168,72,.45)";
       for (const p of pulses) {
-        ctx.beginPath(); ctx.arc(p.a.x + (p.b.x - p.a.x) * p.t, p.a.y + (p.b.y - p.a.y) * p.t, 1.5, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(p.a.x + (p.b.x - p.a.x) * p.t, p.a.y + (p.b.y - p.a.y) * p.t, 1.3, 0, 6.283); ctx.fill();
       }
       for (const a of nodes) {
-        const r = 1.5 + a.flash * 3.2 + a.v * 1.1;
-        if (a.flash > 0.05) { ctx.fillStyle = `rgba(80,250,123,${a.flash * 0.16})`; ctx.beginPath(); ctx.arc(a.x, a.y, r * 4, 0, 6.283); ctx.fill(); }
-        ctx.fillStyle = a.flash > 0.1 ? `rgba(180,255,200,${0.5 + a.flash * 0.5})` : `rgba(140,170,200,${0.3 + a.v * 0.4})`;
+        const r = 1.5 + a.glow * 2 + a.v * 0.8;
+        if (a.glow > 0.05) { ctx.fillStyle = `rgba(240,168,72,${a.glow * 0.07})`; ctx.beginPath(); ctx.arc(a.x, a.y, r * 3.5, 0, 6.283); ctx.fill(); }
+        ctx.fillStyle = `rgba(${a.glow > 0.1 ? "240,168,72" : "217,198,168"},${0.22 + a.v * 0.2 + a.glow * 0.3})`;
         ctx.beginPath(); ctx.arc(a.x, a.y, r, 0, 6.283); ctx.fill();
       }
     }
-    let last = performance.now(), frames = 0, paused = false;
-    const fpsEl = $("#fps");
-    function loop(now) {
-      if (!paused) { step(); draw(); }
-      frames++;
-      if (now - last > 1000) { fpsEl.textContent = `${frames} fps · ${nodes.length} neurons`; frames = 0; last = now; }
+    let paused = false, userPaused = false;
+    try { userPaused = localStorage.getItem("motion") === "off"; } catch {}
+    function loop() {
+      if (!paused && !userPaused) { step(); draw(); }
       requestAnimationFrame(loop);
     }
     neurons.pause = (v) => { paused = v; };
-    addEventListener("resize", () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
-    addEventListener("pointermove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
-    addEventListener("click", (e) => {
-      if (e.target.closest("a,button,input,textarea,canvas:not(#neurons),.viz,.card,.feature,dl,figure,#project-view,#lightbox,#term-overlay")) return;
-      for (const a of nodes) if (Math.hypot(a.x - e.clientX, a.y - e.clientY) < 200 && a.ref === 0) spike(a);
+    const btn = $("#motion-toggle");
+    const syncBtn = () => { btn.textContent = userPaused ? "Resume background" : "Pause background"; btn.setAttribute("aria-pressed", userPaused); };
+    btn.addEventListener("click", () => {
+      userPaused = !userPaused; syncBtn();
+      try { localStorage.setItem("motion", userPaused ? "off" : "on"); } catch {}
     });
+    addEventListener("resize", () => { clearTimeout(resize.t); resize.t = setTimeout(() => { resize(); draw(); }, 150); });
+    addEventListener("pointermove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
     resize();
-    if (reduceMotion) { for (let i = 0; i < 60; i++) step(); draw(); fpsEl.textContent = "static (reduced motion)"; }
-    else requestAnimationFrame(loop);
+    for (let i = 0; i < 60; i++) step();
+    draw();
+    if (reduceMotion) { btn.hidden = true; }
+    else { syncBtn(); requestAnimationFrame(loop); }
   }
 
   /* ================= cursor ring ================= */
@@ -181,7 +183,7 @@
       const max = Math.max(...v.rows.map((r) => r[1]));
       const rows = v.rows.map(([label, val, tone], i) => {
         const y = 78 + i * 74, w = Math.max(6, (val / max) * 300);
-        const fill = tone === "accent" ? "var(--green)" : "rgba(170,182,195,.35)";
+        const fill = tone === "accent" ? "var(--accent)" : "rgba(217,198,168,.28)";
         return `<text x="40" y="${y}" class="vt">${esc(label)}</text>
           <rect x="40" y="${y + 10}" height="28" rx="6" width="0" style="fill:${fill}"><animate attributeName="width" from="0" to="${w}" dur="1.2s" begin="indefinite" fill="freeze" calcMode="spline" keySplines=".2 .8 .2 1" keyTimes="0;1"/></rect>
           <text x="${40 + w + 10}" y="${y + 30}" class="vv ${tone}">${val}</text>`;
@@ -203,6 +205,18 @@
         <text x="${X(lastP[0])}" y="${Y(lastP[1]) - 14}" class="vv accent" text-anchor="end">${lastP[1]}%</text>
         <text x="50" y="234" class="vt dimt">step ${x0}</text><text x="380" y="234" class="vt dimt" text-anchor="end">step ${x1}</text>
       </svg>`;
+    },
+    pairs(v) {
+      const X = (x) => 24 + ((x - v.min) / (v.max - v.min)) * 372;
+      const rows = v.rows.map(([label, a, b], i) => {
+        const y = 62 + i * 50, up = b - a >= 0.5;
+        return `<text x="24" y="${y}" class="vt">${esc(label)}</text>
+          <text x="396" y="${y}" class="vt dimt" text-anchor="end">${a} → <tspan class="${up ? "upv" : ""}">${b}</tspan></text>
+          <line x1="24" x2="396" y1="${y + 16}" y2="${y + 16}" class="axis"/>
+          <line x1="${X(a)}" x2="${X(b)}" y1="${y + 16}" y2="${y + 16}" class="pair"/>
+          <circle cx="${X(a)}" cy="${y + 16}" r="5" class="pa"/><circle cx="${X(b)}" cy="${y + 16}" r="5" class="pb"/>`;
+      }).join("");
+      return `<svg viewBox="0 0 420 262" role="img" aria-label="${esc(v.rows.map((r) => `${r[0]}: ${r[1]} to ${r[2]}`).join(", "))}">${rows}</svg>`;
     },
     image(v) { return `<img src="${v.src}" alt="${esc(v.alt)}" loading="lazy">`; },
     flow(v) {
@@ -263,7 +277,7 @@
       </article>`).join("");
 
     $("#skill-rows").innerHTML = SKILLS.map((g) => `
-      <div class="skill-row reveal"><h4>${esc(g.group)}</h4>
+      <div class="skill-row reveal"><h3>${esc(g.group)}</h3>
         <div class="chips">${g.items.map((s) => `<button class="chip" data-skill="${esc(s)}">${esc(s)}</button>`).join("")}</div>
       </div>`).join("");
 
@@ -378,16 +392,16 @@
     function size() { [, W, H] = fitCanvas(cv, cv.clientWidth < 400 ? 220 : 260); }
     function draw() {
       ctx.clearRect(0, 0, W, H);
-      for (const p of ref) { ctx.fillStyle = "rgba(76,201,240,.16)"; ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 2, 0, 6.283); ctx.fill(); }
+      for (const p of ref) { ctx.fillStyle = "rgba(217,198,168,.14)"; ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 2, 0, 6.283); ctx.fill(); }
       win.forEach((p, i) => {
         const a = 0.35 + (i / win.length) * 0.65;
-        ctx.fillStyle = p.kind === "a" ? `rgba(255,106,193,${a})` : `rgba(76,201,240,${a})`;
+        ctx.fillStyle = p.kind === "a" ? `rgba(214,115,92,${a})` : `rgba(217,198,168,${a})`;
         ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 3.2, 0, 6.283); ctx.fill();
       });
       const v = mmd2(ref, win), alert = v > 0.12;
       out.textContent = v.toFixed(3);
       box.classList.toggle("alert", alert);
-      ctx.fillStyle = alert ? "rgba(255,106,193,.95)" : "rgba(170,182,195,.9)";
+      ctx.fillStyle = alert ? "rgba(214,115,92,.95)" : "rgba(189,180,166,.9)";
       ctx.font = "12px JetBrains Mono, monospace";
       ctx.fillText(alert ? "⚠ Unusual query pattern — raising risk level" : performance.now() < userUntil ? "You are probing…" : "Traffic looks normal", 12, 20);
     }
@@ -421,7 +435,7 @@
       const SLOTS = 4;
       function sim() {
         // real chat traffic mixes many short replies with a few long ones
-        jobs = Array.from({ length: 8 }, (_, i) => ({ id: i, len: Math.random() < 0.65 ? 2 + Math.round(Math.random() * 2) : 9 + Math.round(Math.random() * 5), hue: (i * 47) % 360 }));
+        jobs = Array.from({ length: 8 }, (_, i) => ({ id: i, len: Math.random() < 0.65 ? 2 + Math.round(Math.random() * 2) : 9 + Math.round(Math.random() * 5), hue: 28 + (i % 4) * 7, sat: 55 + (i % 3) * 10, lit: 48 + (i % 4) * 7 }));
         const stat = [], cont = [];
         let t = 0;
         for (let b = 0; b < jobs.length; b += SLOTS) {
@@ -447,21 +461,21 @@
           ctx.clearRect(0, 0, W, 300);
           ctx.font = "12px JetBrains Mono, monospace";
           [["Static", r.stat, 26], ["Continuous", r.cont, 166]].forEach(([name, segs, y0]) => {
-            ctx.fillStyle = "rgba(170,182,195,.9)"; ctx.fillText(name, 10, y0 + 12);
+            ctx.fillStyle = "rgba(189,180,166,.9)"; ctx.fillText(name, 10, y0 + 12);
             for (let s = 0; s < SLOTS; s++) { ctx.fillStyle = "rgba(255,255,255,.04)"; ctx.fillRect(left, y0 + s * (lane + 6), T * scale, lane); }
             for (const g of segs) {
               const y = y0 + g.s * (lane + 6);
-              if (g.idleTo && t > g.b) { ctx.fillStyle = "rgba(255,106,193,.16)"; ctx.fillRect(left + g.b * scale, y, (Math.min(t, g.idleTo) - g.b) * scale, lane); }
+              if (g.idleTo && t > g.b) { ctx.fillStyle = "rgba(214,115,92,.18)"; ctx.fillRect(left + g.b * scale, y, (Math.min(t, g.idleTo) - g.b) * scale, lane); }
               if (t > g.a) {
-                ctx.fillStyle = `hsla(${g.j.hue},70%,60%,.85)`;
+                ctx.fillStyle = `hsla(${g.j.hue},${g.j.sat}%,${g.j.lit}%,.9)`;
                 ctx.fillRect(left + g.a * scale + 1, y, (Math.min(t, g.b) - g.a) * scale - 2, lane);
                 if (t >= g.b) { ctx.fillStyle = "#07090d"; ctx.fillText(`R${g.j.id + 1}`, left + g.a * scale + 6, y + 15); }
               }
             }
           });
-          ctx.fillStyle = "rgba(255,106,193,.7)"; ctx.fillRect(left, 280, 12, 10);
-          ctx.fillStyle = "rgba(170,182,195,.9)"; ctx.fillText("idle slot, waiting for the batch", left + 18, 289);
-          ctx.strokeStyle = "rgba(80,250,123,.8)"; ctx.beginPath(); ctx.moveTo(left + t * scale, 18); ctx.lineTo(left + t * scale, 272); ctx.stroke();
+          ctx.fillStyle = "rgba(214,115,92,.6)"; ctx.fillRect(left, 280, 12, 10);
+          ctx.fillStyle = "rgba(189,180,166,.9)"; ctx.fillText("idle slot, waiting for the batch", left + 18, 289);
+          ctx.strokeStyle = "rgba(236,230,220,.7)"; ctx.beginPath(); ctx.moveTo(left + t * scale, 18); ctx.lineTo(left + t * scale, 272); ctx.stroke();
           if (t < T) raf = requestAnimationFrame(frame);
         })(performance.now());
       }
@@ -497,13 +511,13 @@
           const w = Math.min(Math.abs(x.adv) / 2, 1) * 50;
           return `<div class="grpo-row"><span class="ans">#${i + 1} ${x.fmt ? `answer: \\boxed{${x.ans}}` : `I think it's ${x.ans}`} <span class="${x.ok ? "ok" : "no"}">${x.ok ? "✓" : "✗"}</span></span>
             <span class="rw">${x.r.toFixed(1)}</span>
-            <span class="adv" title="advantage ${x.adv.toFixed(2)}"><i style="left:${x.adv >= 0 ? 50 : 50 - w}%;width:${w}%;background:${x.adv >= 0 ? "var(--green)" : "var(--pink)"}"></i></span></div>`;
+            <span class="adv" title="advantage ${x.adv.toFixed(2)}"><i style="left:${x.adv >= 0 ? 50 : 50 - w}%;width:${w}%;background:${x.adv >= 0 ? "var(--accent)" : "var(--clay)"}"></i></span></div>`;
         }).join("");
         $('[data-s="mean"]', root).textContent = mean.toFixed(2);
         $('[data-s="std"]', root).textContent = std.toFixed(2);
         $(".grpo-note", root).textContent = std < 1e-6
           ? "Every answer got the same reward, so this group teaches nothing. That's why I filter out problems the model always (or never) solves."
-          : "Bars show each answer's advantage: green gets reinforced, pink gets discouraged.";
+          : "Bars show each answer's advantage: amber gets reinforced, red gets discouraged.";
       }
       $('[data-act="sample"]', root).addEventListener("click", sample);
       $('[data-act="next"]', root).addEventListener("click", () => { pi = (pi + 1) % problems.length; sample(); });
@@ -528,11 +542,11 @@
         for (let t = 0; t < 300; t++) { v += -v / tau + I; if (v >= 1) { spikes.push(t); vs.push(1.25); v = 0; } else vs.push(v); }
         const X = (t) => 14 + (t / 299) * (W - 28), Y = (y) => H - 22 - (y / 1.3) * (H - 50);
         ctx.clearRect(0, 0, W, H);
-        ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(255,184,108,.7)"; ctx.beginPath(); ctx.moveTo(14, Y(1)); ctx.lineTo(W - 14, Y(1)); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = "rgba(255,184,108,.9)"; ctx.font = "11px JetBrains Mono, monospace"; ctx.fillText("threshold", 18, Y(1) - 6);
-        ctx.strokeStyle = "rgba(76,201,240,.95)"; ctx.lineWidth = 1.6; ctx.beginPath();
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(214,115,92,.75)"; ctx.beginPath(); ctx.moveTo(14, Y(1)); ctx.lineTo(W - 14, Y(1)); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = "rgba(214,115,92,.9)"; ctx.font = "11px JetBrains Mono, monospace"; ctx.fillText("threshold", 18, Y(1) - 6);
+        ctx.strokeStyle = "rgba(217,198,168,.95)"; ctx.lineWidth = 1.6; ctx.beginPath();
         vs.forEach((y, t) => (t ? ctx.lineTo(X(t), Y(y)) : ctx.moveTo(X(t), Y(y)))); ctx.stroke(); ctx.lineWidth = 1;
-        ctx.fillStyle = "rgba(80,250,123,.95)"; spikes.forEach((t) => ctx.fillRect(X(t) - 1, Y(1.3), 2, 12));
+        ctx.fillStyle = "rgba(240,168,72,.95)"; spikes.forEach((t) => ctx.fillRect(X(t) - 1, Y(1.3), 2, 12));
         $('[data-s="spikes"]', root).textContent = spikes.length;
         $('[data-s="min"]', root).textContent = (1 / tau).toFixed(3);
       }
@@ -598,54 +612,6 @@
       closeProject();
       if (wasOpen && location.hash.length > 1) $(location.hash)?.scrollIntoView();
     }
-  }
-
-  /* ================= job-description matcher ================= */
-  const SAMPLES = [
-    "Machine Learning Engineer Intern. You will train and evaluate deep learning models in Python and PyTorch, build data preprocessing and feature engineering pipelines, and deploy models behind REST APIs with Docker. Familiarity with scikit-learn, Git and SQL is a plus. Experience with AWS or Kubernetes preferred.",
-    "LLM Infrastructure Intern. Help us serve large language models at scale: optimize inference latency and throughput, work on KV cache management, batching and quantization, benchmark against vLLM, and write CUDA or Triton kernels. Strong Python and PyTorch required; experience with transformers and GPU profiling preferred.",
-    "AI Security Research Intern. Study adversarial attacks on LLMs, including prompt injection, model extraction and jailbreaks. Build evaluations and red-teaming tools for AI agents, design defenses and threat models, and write up results. Python, PyTorch and experience with embeddings or retrieval systems required.",
-  ];
-  const evidence = (id) => {
-    if (byId[id]) return [byId[id].title, `#/p/${id}`];
-    const ex = EXPERIENCE.find((e) => e.id === id);
-    if (ex) return [`${ex.org} internship`, "#experience"];
-    if (id === "research") return ["Research paper", "#research"];
-    if (id === "oracle-cert") return ["Oracle certification", "#certifications"];
-    return [id, "#"];
-  };
-  const termRe = (t) => new RegExp(`(?<![a-z0-9+#])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![a-z0-9+#])`, "i");
-  function match(text) {
-    const out = $("#match-out");
-    const jd = text.toLowerCase();
-    if (jd.trim().length < 20) { out.innerHTML = `<p class="fit-empty">Paste a longer job description (a few sentences) to check the fit.</p>`; return; }
-    const found = MATCHER.filter((m) => m.terms.some((t) => termRe(t).test(jd)));
-    const have = found.filter((m) => m.where.length), listed = found.filter((m) => !m.where.length);
-    const gaps = NOT_YET.filter((t) => termRe(t).test(jd));
-    const total = have.length + listed.length + gaps.length;
-    if (!total) { out.innerHTML = `<p class="fit-empty">I couldn't spot any technical requirements I recognize. Try pasting the "requirements" part of the posting.</p>`; return; }
-    const score = Math.round(((have.length + listed.length * 0.5) / total) * 100);
-    const counts = {};
-    have.forEach((m) => m.where.forEach((w) => { if (byId[w]) counts[w] = (counts[w] || 0) + 1; }));
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => byId[id]);
-    out.innerHTML = `
-      <div class="fit-head"><b>${score}%</b><span>of the ${total} requirements I recognized are covered by work I've done</span></div>
-      <div class="fit-bar"><i style="width:0"></i></div>
-      <div class="fit-cols">
-        <div><h4>Covered, with proof</h4><ul class="fit-list">${have.map((m) => `<li><span class="ok">✓</span><span>${esc(m.skill)}</span><span class="ev">${m.where.slice(0, 3).map((w) => { const [n, h] = evidence(w); return `<a href="${h}">${esc(n)}</a>`; }).join(" · ")}</span></li>`).join("") || `<li class="ev">None yet</li>`}
-          ${listed.map((m) => `<li><span class="ok">~</span><span>${esc(m.skill)}</span><span class="ev">on my resume, no public project yet</span></li>`).join("")}</ul></div>
-        <div>
-          ${top.length ? `<h4>Most relevant projects</h4><ul class="fit-list">${top.map((p) => `<li><span class="ok">→</span><a href="#/p/${p.id}">${esc(p.title)}</a></li>`).join("")}</ul>` : ""}
-          ${gaps.length ? `<h4 style="margin-top:22px">Not in my toolkit yet</h4><ul class="fit-list">${gaps.map((g) => `<li><span class="gap">○</span><span>${esc(g)}</span></li>`).join("")}</ul>` : ""}
-        </div>
-      </div>`;
-    requestAnimationFrame(() => ($(".fit-bar i", out).style.width = `${score}%`));
-  }
-  function matcher() {
-    const ta = $("#jd");
-    $("#match-btn").addEventListener("click", () => match(ta.value));
-    $$(".matcher-samples button").forEach((b) => b.addEventListener("click", () => { ta.value = SAMPLES[+b.dataset.sample]; match(ta.value); }));
-    ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) match(ta.value); });
   }
 
   /* ================= lightbox ================= */
@@ -768,16 +734,26 @@
   const overlay = $("#term-overlay");
   function openOverlay() {
     overlay.hidden = false;
+    $("#term-dock").hidden = true;
     if (!term.out.childElementCount) { term.exec("whoami"); term.print([C("d", "type ") + run("help") + C("d", " or click any underlined command.")]); }
     term.input.focus();
   }
-  function closeOverlay() { overlay.hidden = true; }
+  // red closes and clears, yellow tucks the session into a dock pill, green toggles full screen
+  function closeOverlay() { overlay.hidden = true; overlay.classList.remove("maxed"); $("#term-dock").hidden = true; term.out.innerHTML = ""; }
+  function minimizeTerm() { overlay.hidden = true; $("#term-dock").hidden = false; }
 
   /* ================= wiring ================= */
   function wire() {
     term = new Term($("#term-overlay [data-term]"));
     $("#term-toggle").addEventListener("click", openOverlay);
     $("#term-close").addEventListener("click", closeOverlay);
+    $("#term-min").addEventListener("click", minimizeTerm);
+    $("#term-max").addEventListener("click", () => {
+      const on = overlay.classList.toggle("maxed");
+      $("#term-max").title = on ? "Restore size" : "Maximize";
+      term.input.focus();
+    });
+    $("#term-dock").addEventListener("click", openOverlay);
     overlay.addEventListener("click", (e) => { if (e.target === overlay) closeOverlay(); });
 
     // mobile menu
@@ -812,11 +788,8 @@
       if (e.key === "`" && !typing) { e.preventDefault(); overlay.hidden ? openOverlay() : closeOverlay(); }
     });
 
-    $("#year").textContent = new Date().getFullYear();
     $("#copy-email").addEventListener("click", copyEmail);
     addEventListener("hashchange", route);
-    const h1 = $(".glitch");
-    if (!reduceMotion) setInterval(() => { h1.classList.add("glitching"); setTimeout(() => h1.classList.remove("glitching"), 220); }, 6000);
   }
 
   /* ================= init ================= */
@@ -825,7 +798,6 @@
   cursor();
   observe();
   mmdViz();
-  matcher();
   wire();
   route();
   boot().then(typed);

@@ -24,40 +24,6 @@ const SKILLS = [
   { group: "Data & Deploy", items: ["Oracle AI Database", "MongoDB", "Git", "Docker", "Vercel"] },
 ];
 
-// Job-description matcher. Each skill lists the phrases that count as a mention of it.
-// `where` points at project / experience ids that prove it.
-const MATCHER = [
-  { skill: "Python", terms: ["python"], where: ["mini-infer", "grpo", "snn", "researchpilot"] },
-  { skill: "PyTorch", terms: ["pytorch", "torch"], where: ["mini-infer", "grpo", "snn", "personifwy"] },
-  { skill: "TensorFlow", terms: ["tensorflow", "keras"], where: [] },
-  { skill: "Hugging Face", terms: ["hugging face", "huggingface", "transformers library"], where: ["mini-infer", "grpo", "personifwy"] },
-  { skill: "LLMs", terms: ["llm", "llms", "large language model", "language model", "genai", "generative ai", "gpt", "foundation model"], where: ["mini-infer", "grpo", "researchpilot", "personifwy"] },
-  { skill: "LLM inference & serving", terms: ["inference", "serving", "model serving", "vllm", "kv cache", "batching", "latency", "throughput", "tgi"], where: ["mini-infer"] },
-  { skill: "Model optimization", terms: ["quantization", "int8", "speculative decoding", "optimization", "performance tuning", "profiling"], where: ["mini-infer"] },
-  { skill: "Pre-training / fine-tuning", terms: ["pre-training", "pretraining", "fine-tuning", "finetuning", "fine tune", "lora", "peft", "training pipeline"], where: ["grpo", "personifwy"] },
-  { skill: "Reinforcement learning", terms: ["reinforcement learning", "rlhf", "grpo", "ppo", "dpo", "reward model", "rl"], where: ["grpo"] },
-  { skill: "Transformers", terms: ["transformer", "transformers", "attention"], where: ["mini-infer", "grpo", "personifwy"] },
-  { skill: "Deep learning", terms: ["deep learning", "neural network", "neural networks", "cnn", "rnn"], where: ["snn", "personifwy", "mini-infer"] },
-  { skill: "Machine learning", terms: ["machine learning", "ml", "regression", "classification", "supervised"], where: ["foxtrading", "snn"] },
-  { skill: "NLP", terms: ["nlp", "natural language", "summarization", "text classification"], where: ["docket", "researchpilot"] },
-  { skill: "Computer vision", terms: ["computer vision", "object detection", "yolo", "image", "opencv", "ocr"], where: ["traffic", "docket"] },
-  { skill: "AI agents & tool use", terms: ["agent", "agents", "agentic", "tool use", "function calling", "langchain", "llamaindex"], where: ["researchpilot"] },
-  { skill: "RAG", terms: ["rag", "retrieval", "retrieval-augmented", "vector database", "embeddings"], where: ["researchpilot", "research"] },
-  { skill: "Evaluation", terms: ["evaluation", "evals", "benchmark", "benchmarking", "llm-as-a-judge", "metrics", "a/b test"], where: ["grpo", "mini-infer", "researchpilot"] },
-  { skill: "AI security", terms: ["security", "adversarial", "prompt injection", "red team", "red teaming", "safety", "robustness", "threat model"], where: ["research", "researchpilot"] },
-  { skill: "Feature engineering", terms: ["feature engineering", "data preprocessing", "data cleaning", "pandas", "time series"], where: ["foxtrading"] },
-  { skill: "scikit-learn", terms: ["scikit-learn", "sklearn"], where: ["foxtrading"] },
-  { skill: "NumPy", terms: ["numpy"], where: ["snn"] },
-  { skill: "APIs / FastAPI", terms: ["fastapi", "rest api", "api", "apis", "backend"], where: ["researchpilot", "mini-infer"] },
-  { skill: "Docker", terms: ["docker", "container", "containers"], where: ["researchpilot"] },
-  { skill: "Git", terms: ["git", "github", "version control"], where: ["mini-infer", "grpo"] },
-  { skill: "SQL / databases", terms: ["sql", "database", "databases", "mongodb", "postgres", "oracle"], where: ["oracle-cert"] },
-  { skill: "JavaScript", terms: ["javascript", "js", "web"], where: ["docket"] },
-  { skill: "GPU computing", terms: ["gpu", "gpus"], where: ["mini-infer", "grpo", "snn", "personifwy"] },
-];
-// Common requirements I don't claim yet — shown honestly as gaps.
-const NOT_YET = ["kubernetes", "aws", "gcp", "azure", "spark", "scala", "go", "golang", "rust", "c++", "react", "cuda", "triton", "jax", "airflow", "mlflow", "terraform", "tableau", "power bi"];
-
 // Projects. status "building" = in progress, "shipped" = done.
 const PROJECTS = [
   {
@@ -92,9 +58,9 @@ const PROJECTS = [
     status: "building",
     title: "Teaching a Small LLM to Reason with GRPO",
     tagline: "The reinforcement-learning recipe behind DeepSeek-R1, written from scratch and run on free Kaggle GPUs to make a small model better at math.",
-    headline: { value: "62.6% → 69.2%", label: "math accuracy after 250 training steps", context: "Qwen2.5-0.5B on 500 held-out GSM8K problems — and still climbing when the run ended" },
-    visual: { type: "line", unit: "validation accuracy", points: [[0, 62.6], [50, 62.0], [100, 63.8], [150, 67.6], [200, 68.8], [250, 69.2]], xlabel: "training step" },
-    progress: 0.5, stage: "Week 4 of 6 — scaling up to the 1.5B model",
+    headline: { value: "83.4% → 88.4%", label: "on practice problems, but flat on the real test", context: "Qwen2.5-1.5B after 350 GRPO steps. The held-out GSM8K test didn't move (75.8% → 75.7%), so I'm now finding out why" },
+    visual: { type: "pairs", unit: "accuracy before → after GRPO (1.5B)", min: 50, max: 92, rows: [["Practice set (train split)", 83.4, 88.4], ["GSM8K test", 75.8, 75.7], ["SVAMP test", 83.4, 85.3], ["MATH-500 test", 56.4, 56.8]] },
+    progress: 0.67, stage: "Week 5 of 6 — fixing collapse and building a test-like validation set",
     links: [{ label: "Code", url: "https://github.com/Vansh8010-boop/grpo-reasoning" }],
     stack: ["Python", "PyTorch", "LoRA", "vLLM"],
     skills: ["Reinforcement Learning", "LLM Inference", "PyTorch", "Transformers", "Python", "Model Evaluation", "Hugging Face"],
@@ -105,12 +71,13 @@ const PROJECTS = [
         "Verifiable rewards: +1.0 for a correct final answer, +0.2 for the right format.",
         "The GRPO loss and training loop with LoRA, without any RL library, running on two free Kaggle T4 GPUs.",
         "Monitoring that caught a failure greedy accuracy hid: at a higher learning rate the model collapsed into garbage tokens after step 150.",
+        "Scaled to the 1.5B model with a vLLM rollout worker on the second GPU, after filtering out 3,137 problems the model always solved.",
       ],
       results: [
-        { img: "assets/img/grpo-week3.png", caption: "Week 3 runs on the 0.5B model. Blue (lr 1e-5) keeps improving; orange (lr 3e-5) drifts away from the reference model (KL, top right) and its accuracy stalls." },
+        { img: "assets/img/grpo-week3.png", caption: "Week 3 runs on the 0.5B model, measured on the practice set. Blue (lr 1e-5) keeps improving; orange (lr 3e-5) drifts away from the reference model (KL, top right) and its accuracy stalls." },
       ],
       demo: "grpo",
-      honest: "These are 0.5B results so far; the 1.5B run and the full GSM8K / MATH-500 / SVAMP comparison come next.",
+      honest: "The 1.5B model's gains on practice problems didn't carry over to the test sets: GSM8K stayed flat (75.8% → 75.7%), and SVAMP (83.4% → 85.3%) and MATH-500 (56.4% → 56.8%) rose by amounts that aren't statistically significant. The base model already scores about 8 points higher on training-split problems of the same difficulty, which suggests it has seen them before. It also still collapses into garbage tokens after about 330 steps. Week 5 builds a validation set that looks like the test and tries to stop the collapse.",
     },
   },
   {
