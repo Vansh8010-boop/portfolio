@@ -130,7 +130,7 @@ const PROJECTS = [
     status: "shipped",
     title: "ResearchPilot",
     tagline: "An AI agent that plans a research question, searches the web, reads pages and writes an answer — with guard-rails so it can't be hijacked or loop forever.",
-    headline: { value: "80–85%", label: "of research tasks completed", context: "on my 15-task benchmark, graded by an LLM judge; about 90% of individual tool calls succeed" },
+    headline: { value: "90.9%", label: "of research runs passed so far", context: "LLM-judge score on 22 of 45 planned benchmark runs (95.5% by the automatic grader); 97.8% of tool calls succeeded. Benchmark still running" },
     visual: { type: "flow", steps: ["Plan", "Search", "Read", "Calculate", "Answer", "Judge"] },
     links: [{ label: "Live demo", url: "https://researchpilot-taupe.vercel.app/", primary: true }, { label: "Code", url: "https://github.com/Vansh8010-boop/ResearchPilot" }],
     stack: ["Python", "FastAPI", "Streamlit", "Tavily", "Docker"],
@@ -140,8 +140,9 @@ const PROJECTS = [
       built: [
         "A plan-and-execute loop with web search, page retrieval and a calculator tool.",
         "Prompt-injection defenses, tool-level error handling and iteration limits.",
-        "LLM-as-a-judge scoring on a fixed benchmark, then prompt fixes driven by failure analysis.",
+        "LLM-as-a-judge scoring on a fixed benchmark, with failure analysis to guide prompt fixes.",
       ],
+      honest: "These are partial results from 22 of 45 planned runs, because the free Groq tier limits how many can run per day. They come from the baseline with defenses off, and the agent followed an injected instruction in 1 of 2 runs on an attack task. The runs comparing defenses on and off haven't happened yet, and the LLM judge isn't calibrated against hand labels yet.",
     },
   },
   {
