@@ -132,7 +132,7 @@ const PROJECTS = [
     tagline: "An AI agent that plans a research question, searches the web, reads pages and writes an answer — with guard-rails so it can't be hijacked or loop forever.",
     headline: { value: "80–85%", label: "of research tasks completed", context: "on my 15-task benchmark, graded by an LLM judge; about 90% of individual tool calls succeed" },
     visual: { type: "flow", steps: ["Plan", "Search", "Read", "Calculate", "Answer", "Judge"] },
-    links: [{ label: "Ask me for a walkthrough", url: "mailto:vanshryan@gmail.com?subject=ResearchPilot%20walkthrough" }],
+    links: [{ label: "Live demo", url: "https://researchpilot-taupe.vercel.app/", primary: true }, { label: "Code", url: "https://github.com/Vansh8010-boop/ResearchPilot" }],
     stack: ["Python", "FastAPI", "Streamlit", "Tavily", "Docker"],
     skills: ["AI Agents & Tool Use", "LLM-as-a-Judge", "Prompt Engineering", "AI Security", "Python", "FastAPI", "Streamlit", "Docker", "Model Evaluation"],
     page: {
