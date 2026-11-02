@@ -28,13 +28,12 @@ const SKILLS = [
 const PROJECTS = [
   {
     id: "mini-infer",
-    status: "building",
+    status: "shipped",
     title: "Mini LLM Inference Engine",
     tagline: "A server that runs a language model for many users at once — written from scratch to learn how vLLM-style serving works.",
-    headline: { value: "2.37×", label: "faster than Hugging Face", context: "347.8 vs 146.7 tokens/sec when 32 users chat with Qwen2.5 at the same time (ShareGPT traffic)" },
-    visual: { type: "bars", unit: "tokens / sec", rows: [["Hugging Face (best config)", 146.7, "muted"], ["My engine", 347.8, "accent"]] },
-    progress: 0.85, stage: "Week 5 of 5 — final benchmarks",
-    links: [{ label: "Code", url: "https://github.com/Vansh8010-boop/LLM-Inference-Engine" }],
+    headline: { value: "2.4×", label: "faster than Hugging Face, and replies start ~200× sooner", context: "388.9 vs 165.0 tokens/sec when 64 users chat with Qwen2.5 at once on a Tesla T4 (real ShareGPT traffic); at 32 users the first word arrives in 0.18 s instead of 39 s" },
+    visual: { type: "bars", unit: "tokens / sec, 64 users", rows: [["Hugging Face (best config)", 165.0, "muted"], ["My engine", 388.9, "accent"]] },
+    links: [{ label: "Website", url: "https://llm-inference-engine-site.vercel.app/", primary: true }, { label: "Code", url: "https://github.com/Vansh8010-boop/LLM-Inference-Engine" }],
     stack: ["Python", "PyTorch", "FastAPI"],
     skills: ["LLM Inference", "PyTorch", "Transformers", "Python", "Hugging Face", "Model Evaluation", "FastAPI"],
     page: {
@@ -43,14 +42,17 @@ const PROJECTS = [
         "A paged KV cache: memory is handed out in 16-token blocks as replies grow, like virtual memory in an OS.",
         "A continuous-batching scheduler: a new request joins the running batch the moment another one finishes, instead of waiting for the whole batch.",
         "A streaming, OpenAI-compatible API, plus token-for-token correctness tests against Hugging Face.",
-        "Experiments with INT8 weights (36% less memory) and speculative decoding (69% of draft tokens accepted).",
+        "Experiments with INT8 weights (36% less memory, no quality loss) and speculative decoding (68% of draft tokens accepted).",
+        "A benchmark sweep on a Kaggle T4: 1 to 64 users, 3 runs each, every chart rebuilt from the saved results.",
       ],
       results: [
+        { img: "assets/img/mini-infer-throughput.png", caption: "From 8 users up, my engine serves 2.0–2.4× more tokens per second than Hugging Face's best setting, and the first word of a reply arrives in tenths of a second instead of tens of seconds." },
+        { img: "assets/img/mini-infer-ablation.png", caption: "What each piece adds at 32 users: my forward pass alone matches Hugging Face (35 tok/s), batching gets Hugging Face to 170, and paging plus continuous batching gets my engine to 342." },
         { img: "assets/img/kv-memory.png", caption: "Paging cuts wasted KV memory from 80.7% to 1.9%, so the same 3 GB fits 608 conversations instead of 119." },
         { img: "assets/img/kv-speedup.png", caption: "With a KV cache, the time per token stays flat instead of growing with the reply — 1.5× faster decoding on a laptop RTX 3050." },
       ],
       demo: "batching",
-      honest: "INT8 and speculative decoding were correct but not faster on my setup (no fast INT8 kernel on Windows; batch-1 decoding is CPU-bound), so the 2.37× comes from paging and batching alone.",
+      honest: "INT8 and speculative decoding were correct but not faster here (no fast INT8 kernel in PyTorch for this GPU; small models at batch size 1 are limited by kernel launches), so the speedup comes from paging and batching alone. With a single user there is nothing to batch and both run at about 35 tokens/sec.",
     },
   },
   {

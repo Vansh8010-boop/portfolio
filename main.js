@@ -19,7 +19,7 @@
     const lines = [
       ["d", "[    0.000000] vansh-os 2.0.27 (b.tech cse ai&ml) #1 SMP"],
       ["d", "[    0.004211] loading modules: pytorch numpy transformers"],
-      ["ok", "[  OK  ] mounted /projects (4 shipped, 2 in progress)"],
+      ["ok", "[  OK  ] mounted /projects (5 shipped, 1 in progress)"],
       ["ok", "[  OK  ] started paged-attention.service"],
       ["ok", "[  OK  ] started grpo-trainer.service"],
       ["ok", "[  OK  ] initialized 1 spiking neural network"],
