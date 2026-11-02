@@ -19,7 +19,7 @@
     const lines = [
       ["d", "[    0.000000] vansh-os 2.0.27 (b.tech cse ai&ml) #1 SMP"],
       ["d", "[    0.004211] loading modules: pytorch numpy transformers"],
-      ["ok", "[  OK  ] mounted /projects (5 shipped, 1 in progress)"],
+      ["ok", `[  OK  ] mounted /projects (${PROJECTS.filter((p) => p.status === "shipped").length} shipped, ${PROJECTS.filter((p) => p.status === "building").length} in progress)`],
       ["ok", "[  OK  ] started paged-attention.service"],
       ["ok", "[  OK  ] started grpo-trainer.service"],
       ["ok", "[  OK  ] initialized 1 spiking neural network"],
@@ -253,7 +253,9 @@
 
   /* ================= render sections ================= */
   function render() {
-    $("#building-list").innerHTML = PROJECTS.filter((p) => p.status === "building").map((p) => `
+    const building = PROJECTS.filter((p) => p.status === "building");
+    $("#building-title").hidden = $("#building-list").hidden = !building.length;
+    $("#building-list").innerHTML = building.map((p) => `
       <article class="feature reveal" data-skills="${esc(p.skills.join("|"))}">
         ${visual(p)}
         <div>
@@ -652,7 +654,7 @@
       "an LLM inference engine, a GRPO trainer, a spiking neural net, and defenses for LLM APIs.",
     ] },
     projects: { f: () => [
-      C("d", "in progress:"), ...PROJECTS.filter((p) => p.status === "building").map((p) => `  ${C("k", "●")} ${run("open " + p.id)} ${C("d", "— " + p.title)}`),
+      ...(PROJECTS.some((p) => p.status === "building") ? [C("d", "in progress:"), ...PROJECTS.filter((p) => p.status === "building").map((p) => `  ${C("k", "●")} ${run("open " + p.id)} ${C("d", "— " + p.title)}`)] : []),
       C("d", "shipped:"), ...PROJECTS.filter((p) => p.status === "shipped").map((p) => `  ${C("c", "●")} ${run("open " + p.id)} ${C("d", "— " + p.title)}`),
     ] },
     ls: { f: (a) => COMMANDS.projects.f(a) },
@@ -663,7 +665,7 @@
     } },
     cat: { f: (a) => COMMANDS.open.f(a) },
     ps: { f: () => [
-      C("d", "  NAME         PROGRESS"),
+      ...(PROJECTS.some((p) => p.status === "building") ? [C("d", "  NAME         PROGRESS")] : [C("d", "nothing in progress right now: everything has shipped. try " + run("projects"))]),
       ...PROJECTS.filter((p) => p.status === "building").map((p) => `  ${C("k", p.id.padEnd(12))} ${bar(p.progress)} ${String(Math.round(p.progress * 100)).padStart(3)}%\n  ${C("d", "└ " + p.stage)}`),
     ] },
     experience: { f: () => EXPERIENCE.map((e) => `${C("a", e.when.padEnd(16))} ${C("k", e.role)} @ ${e.org}\n${" ".repeat(17)}${C("d", e.summary)}`) },
