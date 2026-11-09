@@ -5,7 +5,7 @@ const SITE = {
   email: "vanshryan@gmail.com",
   github: "https://github.com/Vansh8010-boop",
   linkedin: "https://www.linkedin.com/in/vansh-kulshrestha04/",
-  resume: "assets/Vansh_Kulshrestha_Resume.pdf",
+  resume: "assets/Vansh_Kulshrestha_Resume.pdf?v=2",
   photo: "assets/img/me.jpg",
   roles: [
     "AI / ML engineer",
