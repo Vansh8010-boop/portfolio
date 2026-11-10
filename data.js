@@ -33,7 +33,7 @@ const PROJECTS = [
     tagline: "A server that runs a language model for many users at once — written from scratch to learn how vLLM-style serving works.",
     headline: { value: "2.4×", label: "faster than Hugging Face, and replies start ~200× sooner", context: "388.9 vs 165.0 tokens/sec when 64 users chat with Qwen2.5 at once on a Tesla T4 (real ShareGPT traffic); at 32 users the first word arrives in 0.18 s instead of 39 s" },
     visual: { type: "bars", unit: "tokens / sec, 64 users", rows: [["Hugging Face (best config)", 165.0, "muted"], ["My engine", 388.9, "accent"]] },
-    links: [{ label: "Website", url: "https://llm-inference-engine-site.vercel.app/", primary: true }, { label: "Code", url: "https://github.com/Vansh8010-boop/LLM-Inference-Engine" }],
+    links: [{ label: "Website", url: "https://llm-inference-engine-site.vercel.app/", primary: true }, { label: "Blog post", url: "https://llm-inference-engine-site.vercel.app/blog/" }, { label: "Code", url: "https://github.com/Vansh8010-boop/LLM-Inference-Engine" }],
     stack: ["Python", "PyTorch", "FastAPI"],
     skills: ["LLM Inference", "PyTorch", "Transformers", "Python", "Hugging Face", "Model Evaluation", "FastAPI"],
     page: {
